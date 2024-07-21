@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton\Commands;
+namespace Shawnveltman\AiTestGenerator\Commands;
 
 use Illuminate\Console\Command;
 
-class SkeletonCommand extends Command
+class AiTestGeneratorCommand extends Command
 {
-    public $signature = 'skeleton';
+    public $signature = 'aitestgenerator';
 
     public $description = 'My command';
 
