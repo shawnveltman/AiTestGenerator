@@ -1,6 +1,6 @@
 <?php
 
-namespace Shawnveltman\AiTestGenerator;
+namespace Shawnveltman\AiTestGenerator\Parsers;
 
 use DOMDocument;
 use DOMXPath;

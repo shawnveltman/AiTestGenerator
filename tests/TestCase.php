@@ -3,6 +3,7 @@
 namespace Shawnveltman\AiTestGenerator\Tests;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Http;
 use Orchestra\Testbench\TestCase as Orchestra;
 use Shawnveltman\AiTestGenerator\AiTestGeneratorServiceProvider;
 
@@ -15,6 +16,8 @@ class TestCase extends Orchestra
         Factory::guessFactoryNamesUsing(
             fn (string $modelName) => 'Shawnveltman\\AiTestGenerator\\Database\\Factories\\'.class_basename($modelName).'Factory'
         );
+
+        Http::preventStrayRequests();
     }
 
     protected function getPackageProviders($app)
