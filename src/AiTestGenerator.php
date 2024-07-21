@@ -6,20 +6,20 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Shawnveltman\LaravelOpenai\ProviderResponseTrait;
 
-class AiTestGenerator {
-
+class AiTestGenerator
+{
     use ProviderResponseTrait;
 
     public function handle(string $class_name, array $methods)
     {
         $class_file_name = Str::afterLast($class_name, '\\');
-        $filename        = $class_file_name . now()->format('YmdHis') . 'Test.php';
-        $path            = "generated_tests/{$filename}";
+        $filename = $class_file_name.now()->format('YmdHis').'Test.php';
+        $path = "generated_tests/{$filename}";
 
         $iterative_helper = new IterativeMethodFinderService();
-        $full_results     = $iterative_helper->handle($class_name, $methods);
+        $full_results = $iterative_helper->handle($class_name, $methods);
 
-        $prompt   = $this->get_prompt($class_name, $methods, $full_results);
+        $prompt = $this->get_prompt($class_name, $methods, $full_results);
         $response = $this->get_response_from_provider(prompt: $prompt, model: 'claude-3-5-sonnet-20240620', json_mode: false);
 
         Storage::put($path, $response);
@@ -52,5 +52,4 @@ If you need to add context, do it by using the '''//''' or '''/* */''' comment s
 Your response should begin with ```<?php ``` and end with 
 EOD;
     }
-
 }

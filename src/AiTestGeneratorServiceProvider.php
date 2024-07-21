@@ -2,9 +2,9 @@
 
 namespace Shawnveltman\AiTestGenerator;
 
+use Shawnveltman\AiTestGenerator\Commands\AiTestGeneratorCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Shawnveltman\AiTestGenerator\Commands\AiTestGeneratorCommand;
 
 class AiTestGeneratorServiceProvider extends PackageServiceProvider
 {

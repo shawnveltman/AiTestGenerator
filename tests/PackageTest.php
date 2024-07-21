@@ -6,8 +6,6 @@ use Shawnveltman\AiTestGenerator\AiTestGenerator;
 use Shawnveltman\AiTestGenerator\IterativeMethodFinderService;
 use Shawnveltman\AiTestGenerator\Parsers\CodeCoverageParser;
 use Shawnveltman\AiTestGenerator\Tests\Fixtures\TestClass;
-use Illuminate\Support\Facades\Str;
-
 
 afterEach(function () {
     Mockery::close();
@@ -82,9 +80,9 @@ it('generates and stores test file', function () {
     Http::fake([
         '*' => Http::response([
             'content' => [
-                ['text' => '<?php // Generated test content']
+                ['text' => '<?php // Generated test content'],
             ],
-            'stop_reason' => 'stop'
+            'stop_reason' => 'stop',
         ]),
     ]);
 
@@ -99,7 +97,7 @@ it('generates and stores test file', function () {
 
     expect($files)->not->toBeEmpty();
 
-    if (!empty($files)) {
+    if (! empty($files)) {
         $created_file = $files[0];
 
         // Verify the content of the generated file
@@ -115,7 +113,7 @@ it('combines results correctly', function () {
     $input = [
         'App\\Models\\User' => ['method1', 'method2'],
         'App\\Services\\UserService' => ['serviceMethod'],
-        ['App\\Models\\Post' => ['postMethod']]
+        ['App\\Models\\Post' => ['postMethod']],
     ];
 
     $result = $service->combine_results($input);
@@ -135,12 +133,12 @@ it('extracts and parses JSON correctly', function () {
                     'message' => [
                         'content' => json_encode([
                             'App\\Models\\User' => ['method1', 'method2'],
-                            'App\\Services\\UserService' => ['serviceMethod']
-                        ])
+                            'App\\Services\\UserService' => ['serviceMethod'],
+                        ]),
                     ],
-                    'finish_reason' => 'stop'
-                ]
-            ]
+                    'finish_reason' => 'stop',
+                ],
+            ],
         ]),
     ]);
 
@@ -172,13 +170,13 @@ it('handles recursive method finding', function () {
             'choices' => [
                 [
                     'message' => [
-                        'content' => '<final_output>' . json_encode([
-                                TestClass::class => ['testMethod'],
-                            ]) . '</final_output>'
+                        'content' => '<final_output>'.json_encode([
+                            TestClass::class => ['testMethod'],
+                        ]).'</final_output>',
                     ],
-                    'finish_reason' => 'stop'
-                ]
-            ]
+                    'finish_reason' => 'stop',
+                ],
+            ],
         ]),
     ]);
 

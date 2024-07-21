@@ -13,13 +13,13 @@ class IterativeMethodFinderService
         public ?MethodLocatorService $method_locator_service = null,
         public ?MethodExtractorService $method_extractor_service = null,
     ) {
-        $this->method_locator_service   ??= new MethodLocatorService();
+        $this->method_locator_service ??= new MethodLocatorService();
         $this->method_extractor_service ??= new MethodExtractorService();
     }
 
     public function handle(string $namespace, array $methods, int $depth = 2)
     {
-        $result           = $this->recursive_method_finder($namespace, $methods, $depth);
+        $result = $this->recursive_method_finder($namespace, $methods, $depth);
         $combined_results = $this->combine_results($result);
 
         return $this->combine_truncated_classes($namespace, $methods, $combined_results);
@@ -39,28 +39,21 @@ class IterativeMethodFinderService
 
     public function flatten_and_combine($item, &$combined, $current_class = null): void
     {
-        if (is_array($item))
-        {
-            foreach ($item as $key => $value)
-            {
-                if (is_string($key) && strpos($key, 'App\\') === 0)
-                {
+        if (is_array($item)) {
+            foreach ($item as $key => $value) {
+                if (is_string($key) && strpos($key, 'App\\') === 0) {
                     // This is a class name
                     $this->flatten_and_combine($value, $combined, $key);
-                } else
-                {
+                } else {
                     $this->flatten_and_combine($value, $combined, $current_class);
                 }
             }
-        } elseif (is_string($item) && $current_class)
-        {
-            if (! isset($combined[$current_class]))
-            {
+        } elseif (is_string($item) && $current_class) {
+            if (! isset($combined[$current_class])) {
                 $combined[$current_class] = [];
             }
 
-            if (! in_array($item, $combined[$current_class]))
-            {
+            if (! in_array($item, $combined[$current_class])) {
                 $combined[$current_class][] = $item;
             }
         }
@@ -68,42 +61,36 @@ class IterativeMethodFinderService
 
     public function recursive_method_finder(string $namespace, array $methods, int $depth): array
     {
-        if ($depth <= 0)
-        {
+        if ($depth <= 0) {
             return [];
         }
 
         $class_info = $this->method_locator_service->locate_methods($namespace, $methods);
 
-        if (isset($class_info['error']))
-        {
+        if (isset($class_info['error'])) {
             return ['error' => $class_info['error']];
         }
 
         $truncated_class = $this->method_extractor_service->extract_truncated_class($class_info);
 
-        if (empty($truncated_class))
-        {
+        if (empty($truncated_class)) {
             return ['error' => 'Failed to extract truncated class'];
         }
 
-        $prompt   = $this->generate_prompt($truncated_class);
+        $prompt = $this->generate_prompt($truncated_class);
         $response = $this->get_response_from_provider(prompt: $prompt, model: 'gpt-4o-mini', json_mode: false);
-        $json     = $this->extract_and_parse_json($response);
+        $json = $this->extract_and_parse_json($response);
 
-        if (isset($json['error']))
-        {
+        if (isset($json['error'])) {
             return $json;
         }
 
         $result = [$json];
 
-        foreach ($json as $class => $class_methods)
-        {
+        foreach ($json as $class => $class_methods) {
             $sub_result = $this->recursive_method_finder($class, $class_methods, $depth - 1);
 
-            if (! isset($sub_result['error']))
-            {
+            if (! isset($sub_result['error'])) {
                 $result[] = $sub_result;
             }
         }
@@ -149,8 +136,7 @@ EOD;
         $pattern = '/<final_output>(.*?)<\/final_output>/s';
         $matches = [];
 
-        if (preg_match($pattern, $input_string, $matches))
-        {
+        if (preg_match($pattern, $input_string, $matches)) {
             $json_string = $matches[1];
 
             // Decode JSON string to array
@@ -167,34 +153,28 @@ EOD;
         // Add the original class
         $original_class_info = $this->method_locator_service->locate_methods($original_namespace, $original_methods);
 
-        if (! isset($original_class_info['error']))
-        {
+        if (! isset($original_class_info['error'])) {
             $original_truncated_class = $this->method_extractor_service->extract_truncated_class($original_class_info);
-            $combined_truncated_classes .= $original_truncated_class . "\n\n";
-        } else
-        {
+            $combined_truncated_classes .= $original_truncated_class."\n\n";
+        } else {
             $combined_truncated_classes .= "// Error processing original class {$original_namespace}: {$original_class_info['error']}\n\n";
         }
 
         $combined_truncated_classes .= "// Additional Classes\n";
 
         // Process the rest of the classes
-        foreach ($final_array as $class => $methods)
-        {
+        foreach ($final_array as $class => $methods) {
             // Skip the original class if it's in the final array
-            if ($class === $original_namespace)
-            {
+            if ($class === $original_namespace) {
                 continue;
             }
 
             $class_info = $this->method_locator_service->locate_methods($class, $methods);
 
-            if (! isset($class_info['error']))
-            {
+            if (! isset($class_info['error'])) {
                 $truncated_class = $this->method_extractor_service->extract_truncated_class($class_info);
-                $combined_truncated_classes .= $truncated_class . "\n\n";
-            } else
-            {
+                $combined_truncated_classes .= $truncated_class."\n\n";
+            } else {
                 $combined_truncated_classes .= "// Error processing class {$class}: {$class_info['error']}\n\n";
             }
         }
